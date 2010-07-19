@@ -1,6 +1,6 @@
-# $Id: dist.mk,v 1.8 2010/03/10 15:16:19 tcunha Exp $
+# $Id: dist.mk,v 1.10 2010/07/19 13:57:22 tcunha Exp $
 
-VERSION= 1.2
+VERSION= 1.3
 
 DISTDIR= tmux-${VERSION}
 DISTFILES= *.[ch] Makefile GNUmakefile configure tmux.1 \
@@ -20,7 +20,7 @@ dist:
 
 upload-index.html: update-index.html
 		scp www/index.html www/main.css www/images/*.png \
-		        nicm,tmux@web.sf.net:/home/groups/t/tm/tmux/htdocs
+		        ${USER},tmux@web.sf.net:/home/groups/t/tm/tmux/htdocs
 		rm -f www/index.html www/images/small-*
 
 update-index.html:

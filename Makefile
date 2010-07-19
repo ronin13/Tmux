@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.159 2010/05/12 19:47:25 nicm Exp $
+# $Id: Makefile,v 1.161 2010/07/18 14:53:27 tcunha Exp $
 #
 # Copyright (c) 2009 Nicholas Marriott <nicm@users.sourceforge.net>
 #
@@ -18,7 +18,7 @@
 .SUFFIXES: .c .o
 .PHONY: clean
 
-VERSION= 1.3
+VERSION= 1.4
 
 FDEBUG= 1
 

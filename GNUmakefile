@@ -19,7 +19,7 @@
 
 VERSION= 1.3
 
-FDEBUG= 1
+#FDEBUG= 1
 
 CC?= cc
 CFLAGS+= -DBUILD="\"$(VERSION)\""

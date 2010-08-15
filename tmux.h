@@ -1,4 +1,4 @@
-/* $Id: tmux.h,v 1.571 2010/07/17 14:38:13 tcunha Exp $ */
+/* $Id: tmux.h,v 1.573 2010/08/11 22:16:03 tcunha Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -58,8 +58,8 @@ extern char   **environ;
 /* Automatic name refresh interval, in milliseconds. */
 #define NAME_INTERVAL 500
 
-/* Maximum data to buffer for output before suspending reading from panes. */
-#define BACKOFF_THRESHOLD 1024
+/* Maximum data to buffer for output before suspending writing to a tty. */
+#define BACKOFF_THRESHOLD 16384
 
 /*
  * Maximum sizes of strings in message data. Don't forget to bump
@@ -1016,6 +1016,7 @@ struct tty {
 #define TTY_UTF8 0x8
 #define TTY_STARTED 0x10
 #define TTY_OPENED 0x20
+#define TTY_BACKOFF 0x40
 	int		 flags;
 
 	int		 term_flags;
@@ -1095,9 +1096,17 @@ struct client {
 	char		*cwd;
 
 	struct tty	 tty;
-	FILE		*stdin_file;
-	FILE		*stdout_file;
-	FILE		*stderr_file;
+
+	int		 stdin_fd;
+	void		*stdin_data;
+	void		(*stdin_callback)(struct client *, void *);
+	struct bufferevent *stdin_event;
+
+	int		 stdout_fd;
+	struct bufferevent *stdout_event;
+
+	int		 stderr_fd;
+	struct bufferevent *stderr_event;
 
 	struct event	 repeat_timer;
 
@@ -1107,7 +1116,7 @@ struct client {
 
 #define CLIENT_TERMINAL 0x1
 #define CLIENT_PREFIX 0x2
-/* 0x4 unused */
+#define CLIENT_EXIT 0x4
 #define CLIENT_REDRAW 0x8
 #define CLIENT_STATUS 0x10
 #define CLIENT_REPEAT 0x20	/* allow command to repeat within repeat time */
@@ -1117,6 +1126,8 @@ struct client {
 #define CLIENT_DEAD 0x200
 #define CLIENT_BORDERS 0x400
 #define CLIENT_READONLY 0x800
+#define CLIENT_BACKOFF 0x1000
+#define CLIENT_REDRAWWINDOW 0x2000
 	int		 flags;
 
 	struct event	 identify_timer;

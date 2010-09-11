@@ -1,4 +1,4 @@
-/* $Id: window.c,v 1.134 2010/07/17 14:38:13 tcunha Exp $ */
+/* $Id: window.c,v 1.137 2010/09/07 19:32:58 nicm Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -24,7 +24,6 @@
 #include <fnmatch.h>
 #include <pwd.h>
 #include <signal.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
@@ -493,6 +492,8 @@ window_pane_create(struct window *w, u_int sx, u_int sy, u_int hlimit)
 void
 window_pane_destroy(struct window_pane *wp)
 {
+	window_pane_reset_mode(wp);
+
 	if (wp->fd != -1) {
 		close(wp->fd);
 		bufferevent_free(wp->event);
@@ -500,7 +501,6 @@ window_pane_destroy(struct window_pane *wp)
 
 	input_free(wp);
 
-	window_pane_reset_mode(wp);
 	screen_free(&wp->base);
 	if (wp->saved_grid != NULL)
 		grid_destroy(wp->saved_grid);
@@ -572,7 +572,7 @@ window_pane_spawn(struct window_pane *wp, const char *cmd, const char *shell,
 
 		environ_push(env);
 
-		clear_signals();
+		clear_signals(1);
 		log_close();
 
 		if (*wp->cmd != '\0') {

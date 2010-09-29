@@ -390,6 +390,7 @@ main(int argc, char **argv)
 	options_set_number(so, "visual-activity", 0);
 	options_set_number(so, "visual-bell", 0);
 	options_set_number(so, "visual-content", 0);
+	options_set_number(so, "bell-all", 1);
 
 	keylist = xmalloc(sizeof *keylist);
 	ARRAY_INIT(keylist);

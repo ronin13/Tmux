@@ -133,6 +133,7 @@ const struct set_option_entry set_session_option_table[] = {
 	{ "update-environment", SET_OPTION_STRING, 0, 0, NULL },
 	{ "visual-activity", SET_OPTION_FLAG, 0, 0, NULL },
 	{ "visual-bell", SET_OPTION_FLAG, 0, 0, NULL },
+	{ "bell-all", SET_OPTION_FLAG, 0, 0, NULL },
 	{ "visual-content", SET_OPTION_FLAG, 0, 0, NULL },
 	{ NULL, 0, 0, 0, NULL }
 };

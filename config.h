@@ -17,6 +17,7 @@
 #undef HAVE_PTY_H
 #undef HAVE_QUEUE_H
 #undef HAVE_SETPROCTITLE
+#undef HAVE_STDINT_H
 #undef HAVE_STRCASESTR
 #undef HAVE_STRLCAT
 #undef HAVE_STRLCPY
@@ -34,6 +35,7 @@
 #define HAVE_PROGNAME
 #define HAVE_PTY_H
 #define HAVE_SETENV
+#define HAVE_STDINT_H
 #define HAVE_STRCASESTR
 #define HAVE_STRSEP
 #define HAVE_U_INT

@@ -100,8 +100,10 @@ server_window_check_bell(struct session *s, struct winlink *wl)
 				status_message_set(c, "Bell in current window");
 				continue;
 			}
-			status_message_set(c, "Bell in window %u",
-			    winlink_find_by_window(&s->windows, w)->idx);
+			if (!options_get_number(&global_options, "quiet")){
+			    status_message_set(c, "Bell in window %u",
+			        winlink_find_by_window(&s->windows, w)->idx);
+            }
 		}
 		break;
 	case BELL_CURRENT:
@@ -120,7 +122,9 @@ server_window_check_bell(struct session *s, struct winlink *wl)
 				tty_putcode(&c->tty, TTYC_BEL);
 				continue;
 			}
-			status_message_set(c, "Bell in current window");
+			if (!options_get_number(&global_options, "quiet")){
+			    status_message_set(c, "Bell in current window");
+            }
 		}
 		break;
 	}

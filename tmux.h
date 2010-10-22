@@ -1,4 +1,4 @@
-/* $Id: tmux.h,v 1.577 2010/09/18 15:43:53 tcunha Exp $ */
+/* $Id: tmux.h,v 1.579 2010/10/09 14:30:26 tcunha Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -1659,6 +1659,7 @@ void	 server_unlink_window(struct session *, struct winlink *);
 void	 server_destroy_pane(struct window_pane *);
 void	 server_destroy_session_group(struct session *);
 void	 server_destroy_session(struct session *);
+void	 server_check_unattached (void);
 void	 server_set_identify(struct client *);
 void	 server_clear_identify(struct client *);
 void	 server_update_event(struct client *);
@@ -1824,9 +1825,7 @@ int	 screen_check_selection(struct screen *, u_int, u_int);
 
 /* window.c */
 extern struct windows windows;
-int		 window_cmp(struct window *, struct window *);
 int		 winlink_cmp(struct winlink *, struct winlink *);
-RB_PROTOTYPE(windows, window, entry, window_cmp);
 RB_PROTOTYPE(winlinks, winlink, entry, winlink_cmp);
 struct winlink	*winlink_find_by_index(struct winlinks *, int);
 struct winlink	*winlink_find_by_window(struct winlinks *, struct window *);

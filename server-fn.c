@@ -1,4 +1,4 @@
-/* $Id: server-fn.c,v 1.110 2010/08/11 22:16:43 tcunha Exp $ */
+/* $Id: server-fn.c,v 1.113 2010/10/09 14:31:50 tcunha Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -280,8 +280,10 @@ server_link_window(struct session *src, struct winlink *srcwl,
 	if (dstidx != -1)
 		dstwl = winlink_find_by_index(&dst->windows, dstidx);
 	if (dstwl != NULL) {
-		if (dstwl->window == srcwl->window)
+		if (dstwl->window == srcwl->window) {
+			xasprintf(cause, "same index: %d", dstidx);
 			return (-1);
+		}
 		if (killflag) {
 			/*
 			 * Can't use session_detach as it will destroy session
@@ -368,7 +370,7 @@ server_next_session(struct session *s)
 	s_out = NULL;
 	for (i = 0; i < ARRAY_LENGTH(&sessions); i++) {
 		s_loop = ARRAY_ITEM(&sessions, i);
-		if (s_loop == s)
+		if (s_loop == NULL || s_loop == s)
 			continue;
 		if (s_out == NULL ||
 		    timercmp(&s_loop->activity_time, &s_out->activity_time, <))
@@ -402,6 +404,25 @@ server_destroy_session(struct session *s)
 		}
 	}
 	recalculate_sizes();
+}
+
+void
+server_check_unattached (void)
+{
+	struct session	*s;
+	u_int		 i;
+
+	/*
+	 * If any sessions are no longer attached and have destroy-unattached
+	 * set, collect them.
+	 */
+	for (i = 0; i < ARRAY_LENGTH(&sessions); i++) {
+		s = ARRAY_ITEM(&sessions, i);
+		if (s == NULL || !(s->flags & SESSION_UNATTACHED))
+			continue;
+		if (options_get_number (&s->options, "destroy-unattached"))
+			session_destroy(s);
+	}
 }
 
 void

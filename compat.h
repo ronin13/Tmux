@@ -1,4 +1,4 @@
-/* $Id: compat.h,v 1.26 2010/09/07 19:32:58 nicm Exp $ */
+/* $Id: compat.h,v 1.30 2010/10/27 21:40:03 nicm Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -15,6 +15,20 @@
  * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
+#ifndef COMPAT_H
+#define COMPAT_H
+
+#ifndef __GNUC__
+#define __attribute__(a)
+#endif
+
+#ifndef __dead
+#define __dead __attribute__ ((__noreturn__))
+#endif
+#ifndef __packed
+#define __packed __attribute__ ((__packed__))
+#endif
 
 #ifndef HAVE_U_INT
 typedef uint8_t u_int8_t;
@@ -49,14 +63,6 @@ typedef uint64_t u_int64_t;
 #include "compat/bitstring.h"
 #endif
 
-#ifdef HAVE_GETOPT
-#include <getopt.h>
-#endif
-
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
 #ifdef HAVE_PATHS_H
 #include <paths.h>
 #endif
@@ -79,10 +85,10 @@ typedef uint64_t u_int64_t;
 #include "compat/vis.h"
 #endif
 
-#ifndef HAVE_IMSG
-#include "compat/imsg.h"
-#else
+#ifdef HAVE_IMSG
 #include <imsg.h>
+#else
+#include "compat/imsg.h"
 #endif
 
 #ifdef HAVE_STDINT_H
@@ -129,13 +135,6 @@ typedef uint64_t u_int64_t;
 #define SUN_LEN(sun) (sizeof (sun)->sun_path)
 #endif
 
-#ifndef __dead
-#define __dead __attribute__ ((__noreturn__))
-#endif
-#ifndef __packed
-#define __packed __attribute__ ((__packed__))
-#endif
-
 #ifndef timercmp
 #define	timercmp(tvp, uvp, cmp)						\
 	(((tvp)->tv_sec == (uvp)->tv_sec) ?				\
@@ -161,6 +160,14 @@ typedef uint64_t u_int64_t;
 
 #ifndef HAVE_BZERO
 #define bzero(buf, len) memset(buf, 0, len);
+#endif
+
+#ifndef HAVE_CLOSEFROM
+/* closefrom.c */
+#define HAVE_FCNTL_H
+#define HAVE_DIRENT_H
+#define HAVE_SYSCONF
+void	closefrom(int);
 #endif
 
 #ifndef HAVE_STRCASESTR
@@ -215,7 +222,9 @@ int		 setenv(const char *, const char *, int);
 int		 unsetenv(const char *);
 #endif
 
-#ifndef HAVE_GETOPT
+#ifdef HAVE_GETOPT
+#include <getopt.h>
+#else
 /* getopt.c */
 extern int	BSDopterr;
 extern int	BSDoptind;
@@ -230,3 +239,5 @@ int	BSDgetopt(int, char *const *, const char *);
 #define optreset           BSDoptreset
 #define optarg             BSDoptarg
 #endif
+
+#endif /* COMPAT_H */

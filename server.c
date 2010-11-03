@@ -1,4 +1,4 @@
-/* $Id: server.c,v 1.245 2010/10/09 14:29:32 tcunha Exp $ */
+/* $Id: server.c,v 1.248 2010/10/24 19:54:41 nicm Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -97,8 +97,6 @@ server_create_socket(void)
 		fatal("fcntl failed");
 	if (fcntl(fd, F_SETFL, mode|O_NONBLOCK) == -1)
 		fatal("fcntl failed");
-	if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
-		fatal("fcntl failed");
 
 	server_update_socket();
 
@@ -107,16 +105,13 @@ server_create_socket(void)
 
 /* Fork new server. */
 int
-server_start(char *path)
+server_start(void)
 {
 	struct window_pane	*wp;
 	int	 		 pair[2];
 	char			*cause;
 	struct timeval		 tv;
 	u_int			 i;
-#ifdef HAVE_SETPROCTITLE
-	char			 rpathbuf[MAXPATHLEN];
-#endif
 
 	/* The first client is special and gets a socketpair; create it. */
 	if (socketpair(AF_UNIX, SOCK_STREAM, PF_UNSPEC, pair) != 0)
@@ -159,13 +154,9 @@ server_start(char *path)
 	utf8_build();
 
 	start_time = time(NULL);
-	socket_path = path;
-
-#ifdef HAVE_SETPROCTITLE
-	if (realpath(socket_path, rpathbuf) == NULL)
-		strlcpy(rpathbuf, socket_path, sizeof rpathbuf);
 	log_debug("socket path %s", socket_path);
-	setproctitle("server (%s)", rpathbuf);
+#ifdef HAVE_SETPROCTITLE
+	setproctitle("server (%s)", socket_path);
 #endif
 
 	server_fd = server_create_socket();

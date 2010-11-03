@@ -1,4 +1,4 @@
-/* $Id: window.c,v 1.137 2010/09/07 19:32:58 nicm Exp $ */
+/* $Id: window.c,v 1.140 2010/10/24 01:34:30 tcunha Exp $ */
 
 /*
  * Copyright (c) 2007 Nicholas Marriott <nicm@users.sourceforge.net>
@@ -322,6 +322,7 @@ window_resize(struct window *w, u_int sx, u_int sy)
 void
 window_set_active_pane(struct window *w, struct window_pane *wp)
 {
+	w->last = w->active;
 	w->active = wp;
 	while (!window_pane_visible(w->active)) {
 		w->active = TAILQ_PREV(w->active, window_panes, entry);
@@ -365,9 +366,16 @@ window_add_pane(struct window *w, u_int hlimit)
 void
 window_remove_pane(struct window *w, struct window_pane *wp)
 {
-	w->active = TAILQ_PREV(wp, window_panes, entry);
-	if (w->active == NULL)
-		w->active = TAILQ_NEXT(wp, entry);
+	if (wp == w->active) {
+		w->active = w->last;
+		w->last = NULL;
+		if (w->active == NULL) {
+			w->active = TAILQ_PREV(wp, window_panes, entry);
+			if (w->active == NULL)
+				w->active = TAILQ_NEXT(wp, entry);
+		}
+	} else if (wp == w->last)
+		w->last = NULL;
 
 	TAILQ_REMOVE(&w->panes, wp, entry);
 	window_pane_destroy(wp);
@@ -570,6 +578,8 @@ window_pane_spawn(struct window_pane *wp, const char *cmd, const char *shell,
 		if (tcsetattr(STDIN_FILENO, TCSANOW, &tio2) != 0)
 			fatal("tcgetattr failed");
 
+		closefrom(STDERR_FILENO + 1);
+
 		environ_push(env);
 
 		clear_signals(1);
@@ -599,8 +609,6 @@ window_pane_spawn(struct window_pane *wp, const char *cmd, const char *shell,
 	if ((mode = fcntl(wp->fd, F_GETFL)) == -1)
 		fatal("fcntl failed");
 	if (fcntl(wp->fd, F_SETFL, mode|O_NONBLOCK) == -1)
-		fatal("fcntl failed");
-	if (fcntl(wp->fd, F_SETFD, FD_CLOEXEC) == -1)
 		fatal("fcntl failed");
 	wp->event = bufferevent_new(wp->fd,
 	    window_pane_read_callback, NULL, window_pane_error_callback, wp);

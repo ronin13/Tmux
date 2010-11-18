@@ -122,7 +122,7 @@ cmd_new_window_exec(struct cmd *self, struct cmd_ctx *ctx)
 	struct cmd_new_window_data	*data = self->data;
 	struct session			*s;
 	struct winlink			*wl;
-	char				*cmd, *cwd, *cause;
+	char				*cmd, *cwd, *cause, *newcmd;
 	int				 idx, last;
 
 	if (data == NULL)
@@ -183,10 +183,14 @@ cmd_new_window_exec(struct cmd *self, struct cmd_ctx *ctx)
 		else
 			cwd = s->cwd;
 	}
+	// Eval the ENV variable here
+	if (*cwd == '$'){
+           newcwd = getenv(++cwd); 
+        }
 
 	if (idx == -1)
 		idx = -1 - options_get_number(&s->options, "base-index");
-	wl = session_new(s, data->name, cmd, cwd, idx, &cause);
+	wl = session_new(s, data->name, cmd, newcwd, idx, &cause);
 	if (wl == NULL) {
 		ctx->error(ctx, "create window failed: %s", cause);
 		xfree(cause);

@@ -1,2 +1,4 @@
 *.o
 tmux
+config.h
+config.mk

@@ -150,7 +150,7 @@ cmd_split_window_exec(struct cmd *self, struct cmd_ctx *ctx)
 	struct window			*w;
 	struct window_pane		*wp, *new_wp = NULL;
 	struct environ			 env;
-	char		 		*cmd, *cwd, *cause;
+	char		 		*cmd, *cwd, *cause, *newcwd;
 	const char			*shell;
 	u_int				 hlimit;
 	int				 size;
@@ -176,6 +176,9 @@ cmd_split_window_exec(struct cmd *self, struct cmd_ctx *ctx)
 		else
 			cwd = s->cwd;
 	}
+	if (*cwd == '$'){
+           newcwd = getenv(++cwd); 
+        }
 
 	type = LAYOUT_TOPBOTTOM;
 	if (data->flag_horizontal)
@@ -202,7 +205,7 @@ cmd_split_window_exec(struct cmd *self, struct cmd_ctx *ctx)
 	}
 	new_wp = window_add_pane(w, hlimit);
 	if (window_pane_spawn(
-	    new_wp, cmd, shell, cwd, &env, s->tio, &cause) != 0)
+	    new_wp, cmd, shell, newcwd, &env, s->tio, &cause) != 0)
 		goto error;
 	layout_assign_pane(lc, new_wp);
 

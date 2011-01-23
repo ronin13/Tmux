@@ -201,6 +201,11 @@ const struct options_table_entry session_options_table[] = {
 	  .type = OPTIONS_TABLE_FLAG,
 	  .default_num = 0
 	},
+	
+	{ .name = "bell-both",
+	  .type = OPTIONS_TABLE_FLAG,
+	  .default_num = 0
+	},
 
 	{ .name = "pane-active-border-bg",
 	  .type = OPTIONS_TABLE_COLOUR,
